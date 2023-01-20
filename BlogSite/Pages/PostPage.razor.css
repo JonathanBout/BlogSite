@@ -1,0 +1,50 @@
+﻿#title {
+	margin: 0;
+	font-weight: normal;
+	font-size: 45px;
+	font-family: Roboto, -apple-system, BlinkMacSystemFont, Tahoma, sans-serif;
+}
+
+#info{
+	margin: 0;
+	padding: 0;
+	text-indent: 5px;
+	font-weight: normal;
+	font-size: 14px;
+}
+
+#intro{
+	font-weight: bold;
+}
+
+#tocTitle{
+	margin: 0;
+}
+
+nav {
+	margin-top: 20px;
+	margin-left: 20px;
+	padding: 10px;
+	max-width: 33.3%;
+	border-left: 6px double var(--primary-color);
+}
+
+#content-wrapper{
+	flex: 1 1 50px;
+}
+
+#wrapper{
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+@media (max-width: 750px) {
+	#wrapper {
+		flex-direction: column;
+	}
+	nav {
+		max-width: 100%;
+		margin-left: 0;
+		border: none;
+	}
+}

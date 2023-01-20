@@ -1,0 +1,33 @@
+﻿@using System.Net;
+@page "/error/{ErrorCode:int?}"
+<div id="wrapper">
+	<h1>@((int)ErrorCode)</h1>
+	<h3>@(ErrorCode.ToString().Humanize())</h3>
+	<p>@ErrorString</p>
+	<p>
+		<a href="javascript:navigation.reload()">Reload</a> the page, go to <a href="/">the home page</a> or <a href="javascript:navigation.back()">go back</a>.
+	</p>
+</div>
+
+@code {
+	[Parameter, EditorRequired]
+	public HttpStatusCode ErrorCode { get; set; }
+	[Parameter]
+	public string ErrorMessage { get; set; } = "";
+	string ErrorString {
+		get
+		{
+			if (!string.IsNullOrEmpty(ErrorMessage))
+			{
+				return ErrorMessage;
+			}
+			return ErrorCode switch
+			{
+				HttpStatusCode.NotFound => "This page does not exist on our server.",
+				HttpStatusCode.InternalServerError => "The server ran into a problem. Please try again later.",
+				HttpStatusCode.Unauthorized => "You do not have access to this page.",
+				_ => ""
+			};
+		}
+	}
+}

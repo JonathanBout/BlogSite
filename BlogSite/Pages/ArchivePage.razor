@@ -1,0 +1,168 @@
+﻿@page "/{year:int}/{month:int?}/{day:int?}"
+@using BlogSite.Data.Services;
+@using System.Text;
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.RegularExpressions;
+@inject BlogPostLoader BlogPosts
+@inject NavigationManager Navigation
+<h1>@TitleMessage</h1>
+
+<div id="wrapper">
+	<div id="date-stepper">
+		<a href="javascript:void(0)" @onclick='() => Navigate(false)'>◀ prev</a>
+		<InputText placeholder='@DateTime.Now.ToString("dd-MM-yyyy")' id="stepper-date" @bind-Value:get="DateText" @bind-Value:set="Navigate"/>
+		<a href="javascript:void(0)" @onclick='() => Navigate(true)'>next ▶</a>
+	</div>
+	@if (string.IsNullOrWhiteSpace(ErrorMessage))
+	{
+		var posts = GetPosts();
+
+		@if (posts.Length > 0)
+		{
+			@foreach (var post in posts.ToList().OrderByDescending(x => x.PublishedOn))
+			{
+				<BlogPostPreview Post="post" />
+			}
+		}else
+		{
+			<p>No posts found.</p>
+		}
+
+	}else
+	{
+		@ErrorMessage
+	}
+</div>
+
+@code {
+	[Parameter]
+	public int Year { get; set; } = -1;
+	[Parameter]
+	public int Month { get; set; } = -1;
+	[Parameter]
+	public int Day { get; set; } = -1;
+
+	public BlogPost[]? LoadedPosts { get; set; } = null;
+
+	public string ErrorMessage = "";
+	string _titleMessage = "Archive";
+	public string TitleMessage
+	{
+		get => _titleMessage;
+		set
+		{
+			_titleMessage = value;
+			StateHasChanged();
+		}
+	}
+
+	public string DateText {
+		get
+		{
+			StringBuilder stringBuilder = new StringBuilder(Year.ToString());
+			if (Month > 0)
+			{
+				stringBuilder.Insert(0, "-");
+				stringBuilder.Insert(0, Month);
+				if (Day > 0)
+				{
+					stringBuilder.Insert(0, "-");
+					stringBuilder.Insert(0, Day);
+				}
+			}
+			return stringBuilder.ToString();
+		}
+	}
+
+	public BlogPost[] GetPosts()
+	{
+		if (LoadedPosts is null)
+		{
+			LoadedPosts = GetPostsInternal();
+		}
+		return LoadedPosts;
+	}
+
+	public BlogPost[] GetPostsInternal()
+	{
+		if (Day > 0)
+		{
+			try
+			{
+				var date = new DateTime(Year, Month, Day);
+				TitleMessage = "Posts from " + date.ToString("MMMM dd, yyyy");
+				return BlogPosts.GetPosts(startDate: date, endDate: date);
+			} catch(ArgumentOutOfRangeException) {}
+		}
+		else if (Month > 0)
+		{
+			try {
+				var date = new DateTime(Year, Month, 1);
+				TitleMessage = $"Posts from " + date.ToString("MMMM yyyy");
+				return BlogPosts.GetPosts(startDate: date, new DateTime(date.Year, date.Month, date.MonthLength()));
+			} catch (ArgumentOutOfRangeException) { }
+		}
+		else if (Year > 2000)
+		{
+			try {
+				var date = new DateTime(Year, 1, 1);
+				TitleMessage = $"Posts from " + date.ToString("yyyy");
+				return BlogPosts.GetPosts(startDate: date, new DateTime(date.Year, 12, 31));
+			} catch (ArgumentOutOfRangeException) { }
+		}
+
+		if (Year <= 2000)
+		{
+			ErrorMessage = "Invalid year. It should be more than 2000.";
+		}else
+		{
+			if (Month < 1 || Month > 12)
+			{
+				ErrorMessage = "Invalid month. It should be less than 13 and more than 0";
+			}else
+			{
+				int daysInMonth = DateTime.DaysInMonth(Year, Month);
+				if (Day < 1 || Day > daysInMonth)
+				{
+					ErrorMessage = $"Invalid day. It should be less than the amount of days in the month. For the month {Month}/{Year}, that is {daysInMonth} days.";
+				}
+			}
+		}
+		StateHasChanged();
+		return Array.Empty<BlogPost>();
+	}
+
+	public void Navigate(bool forward)
+	{
+		string pathToNavigate = "";
+		int change = forward ? 1 : -1;
+
+		if (Day > 0)
+		{
+			DateTime dt = new DateTime(Year, Month, Day).AddDays(change);
+			pathToNavigate = $"/{dt.Year}/{dt.Month}/{dt.Day}";
+		}else if (Month > 0)
+		{
+			DateTime dt = new DateTime(Year, Month, 1).AddMonths(change);
+			pathToNavigate = $"/{dt.Year}/{dt.Month}";
+		}else
+		{
+			pathToNavigate = $"/{Year + change}";
+		}
+		Navigation.NavigateTo(pathToNavigate, true);
+	}
+
+	public void Navigate(string date)
+	{
+		Regex regex = new Regex(@"^(?>\d\d?-)?(?>\d\d?-)?\d{4}$");
+		if (!regex.IsMatch(date))
+		{
+			Navigation.Reload();
+			return;
+		}
+		string[] splits = date.Split("-");
+		splits = splits.Reverse().ToArray();
+		string pathToNavigate = string.Join('/', splits);
+		Navigation.NavigateTo("/" + pathToNavigate, true);
+	}
+}

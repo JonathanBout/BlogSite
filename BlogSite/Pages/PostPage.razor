@@ -1,0 +1,72 @@
+﻿@page "/{year:int}/{month:int}/{day:int}/{id:int}/{*title}"
+@inject BlogPostLoader BlogPosts
+@inject NavigationManager Navigation
+@if (Loading)
+{
+	<p>Loading the post...</p>
+}else if (Post is null)
+{
+	string errormsg = $"We did not find an article with Id {Id}.";
+	<ErrorView ErrorCode="System.Net.HttpStatusCode.NotFound" ErrorMessage='@errormsg'/>
+}else
+{
+	<h1 id="title">@Post.Title</h1>
+	<div id="info" >Blog post Id: @Post.Id | Posted on @Post.PublishedOn.ToString("dddd MMMM dd, yyyy; hh:mm")</div>
+	<div id="wrapper">
+		<nav>
+			<h2 id="tocTitle">Table of Contents</h2>
+			<ol>
+				@foreach(var title in ParagraphTitles)
+				{
+					<li>
+						<a @onclick='() => Navigation.NavigateTo(Navigation.Uri.DeAnchorize() + "#" + title.Browserize(), true)'>
+							@title
+						</a>
+					</li>
+				}
+			</ol>
+		</nav>
+		<div id="content-wrapper">
+			<p  id="intro">@Post.Introduction.Body</p>
+			@foreach(var paragraph in Post.Paragraphs)
+			{
+				@if (!string.IsNullOrWhiteSpace(paragraph.Title))
+				{
+					<h3 id="@paragraph.Title.Browserize()">@paragraph.Title</h3>
+				}
+				<p>@paragraph.Body</p>
+			}
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public int Id { get; set; } = 0;
+	[Parameter]
+	public int Year { get; set; } = 0;
+	[Parameter]
+	public int Month { get; set; } = 0;
+	[Parameter]
+	public int Day { get; set; } = 0;
+	[Parameter]
+	public string Title { get; set; } = "";
+
+	public BlogPost Post { get; set; } = null!;
+	public string[] ParagraphTitles
+	{
+		get
+		{
+			if (Post is null) return Array.Empty<string>();
+			else return Post.Paragraphs.Where(x => !string.IsNullOrEmpty(x.Title))
+				.Select(x => x.Title!).ToArray();
+		}
+	}
+	bool Loading { get; set; } = true;
+
+	protected override void OnParametersSet()
+	{
+		Post = BlogPosts.GetBlogPost(Id);
+		Loading = false;
+	}
+}

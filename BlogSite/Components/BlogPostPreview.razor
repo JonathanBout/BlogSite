@@ -1,0 +1,47 @@
+﻿@inject NavigationManager Navigation
+
+@if (Visibility != PreviewComponentVisibility.Hidden)
+{
+<div class="post" @onclick='() => Navigation.NavigateTo("/post/" + Post.Id, true)'>
+		@if (Visibility.HasFlag(PreviewComponentVisibility.Title))
+		{
+			<div class="title">@Post.Title</div>
+		}
+		<div class="date">
+			@{
+				bool hasCreationDate = Visibility.HasFlag(PreviewComponentVisibility.CreationDate);
+				bool hasTimeToRead = Visibility.HasFlag(PreviewComponentVisibility.TimeToRead);
+			}
+			@if (hasCreationDate)
+			{
+				@Post.PublishedOn.ToString("dd MMMM yyyy, HH:mm")
+			}
+			@if (hasCreationDate && hasTimeToRead)
+			{
+				<span> | </span>
+			}
+			@if (hasTimeToRead)
+			{
+				<span>
+					Reading Time: about
+ 				</span>
+				@Post.CalculateReadingTime().Minutes
+				<span>
+					Minutes
+				</span>
+			}
+		</div>
+		@if (Visibility.HasFlag(PreviewComponentVisibility.ContentPreview))
+		{
+			<div class="contentPreview">@Post.Introduction</div>
+		}
+</div>
+}
+
+@code {
+	[Parameter, EditorRequired]
+	public BlogPost Post { get; set; } = null!;
+
+	[Parameter]
+	public PreviewComponentVisibility Visibility { get; set; } = PreviewComponentVisibility.All;
+}

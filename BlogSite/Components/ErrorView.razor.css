@@ -1,0 +1,30 @@
+﻿#wrapper{
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+	align-items: center;
+	vertical-align: central;
+}
+
+h1 {
+	font-size: 60px;
+	margin: 0;
+	padding: 0;
+}
+
+h3 {
+	font-size: 30px;
+	margin: 0;
+}
+
+#wrapper > p {
+	margin: 0;
+}
+
+#wrapper > p:first-of-type {
+	margin-top: 20px;
+}
+
+* {
+	font-family: 'Cascadia Code', 'Cascadia Mono', Courier New, Courier, monospace;
+}

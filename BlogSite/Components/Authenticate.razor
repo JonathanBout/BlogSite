@@ -1,0 +1,24 @@
+﻿@if (Authenticated)
+{
+	@ChildContent
+}
+else
+{
+	<b>Authenticating...</b>
+}
+@code {
+	bool Authenticated { get; set; } = false;
+
+	[Parameter]
+	public RenderFragment ChildContent { get; set; } = null!;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			Authenticated = true;
+			StateHasChanged();
+		}
+		await base.OnAfterRenderAsync(firstRender);
+	}
+}

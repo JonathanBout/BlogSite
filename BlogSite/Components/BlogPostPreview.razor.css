@@ -1,0 +1,43 @@
+﻿.post {
+	width: calc(100% - 2px);
+	max-width: 1000px;
+	margin: 10px 0;
+	padding: 5px;
+	border-radius: 10px;
+	border: 1px solid #777;
+}
+
+@media (min-width: 700px) {
+	.post:hover {
+		transform-origin: left center;
+		transform: scale(1.01);
+		cursor: pointer;
+		background-color: #eee;
+	}
+}
+
+.title {
+	font-size: 24px;
+	font-weight: bold;
+}
+
+.date {
+}
+
+.contentPreview {
+	margin-top: 5px;
+	overflow: hidden;
+	text-overflow: clip;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	-webkit-box-orient: vertical;
+	mask-image: linear-gradient(to bottom, white, transparent);
+	-webkit-mask-image: linear-gradient(to bottom, white, transparent);
+}
+
+@media (hover: none) {
+	:hover {
+		transform: none;
+	}
+}
