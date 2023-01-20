@@ -2,10 +2,8 @@ using BlogSite.Data;
 using BlogSite.Middleware;
 using BlogSite.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
+using System.Collections.Specialized;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -159,4 +157,14 @@ internal static partial class Program
 	{
 		navigation.NavigateTo(navigation.Uri, true);
 	}
+
+    public static NameValueCollection QueryString(this NavigationManager navigationManager)
+    {
+        return HttpUtility.ParseQueryString(new Uri(navigationManager.Uri).Query);
+    }
+
+    public static string QueryString(this NavigationManager navigationManager, string key)
+    {
+        return navigationManager.QueryString()[key]??"";
+    }
 }
