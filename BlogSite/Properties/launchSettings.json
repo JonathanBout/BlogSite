@@ -19,7 +19,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Devtunnel, HTTPS": {
+    "HTTPS, Devtunnel": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

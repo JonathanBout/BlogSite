@@ -1,6 +1,6 @@
 using BlogSite.Data;
-using BlogSite.Data.Services;
 using BlogSite.Middleware;
+using BlogSite.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -41,7 +41,7 @@ internal static partial class Program
 		app.Run();
 	}
 
-	[GeneratedRegex("(?<=[^0-9-_])([A-Z0-9])", RegexOptions.Compiled)]
+	[GeneratedRegex(@"(?<=[^0-9-_])([A-Z0-9])", RegexOptions.Compiled)]
 	public static partial Regex PascalCaseRegex();
 
 	public static string Humanize(this string pascalCaseString)
@@ -76,7 +76,7 @@ internal static partial class Program
 	{
 		return $"/{post.PublishedOn.Year}/{post.PublishedOn.Month}/{post.PublishedOn.Day}/{post.Id}/{post.Title.Browserize()}";
 	}
-	const string lettersString = "ABCDEFGHIJKLMNOPQRSTUVWXYZaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyz";
+	const string lettersString = "ABCDEFGHIJKLMNOPQRSTUVWXYZaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyz";
 	
 	public static Paragraph Paragraph(this Random random, int minWordCount = 50, int maxWordCount = 200)
 	{

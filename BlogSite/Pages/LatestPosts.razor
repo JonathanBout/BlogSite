@@ -1,13 +1,13 @@
 ﻿@page "/Latest"
-@using BlogSite.Data.Services;
+@using BlogSite.Services
 @inject BlogPostLoader BlogPosts
 <h1>Latest on this site</h1>
 
 <Authenticate>
 	<div id="wrapper">
-		@foreach(var post in GetLatestPosts().ToList().OrderByDescending(x => x.PublishedOn))
+		@foreach (var post in GetLatestPosts().ToList().OrderByDescending(x => x.PublishedOn))
 		{
-			<BlogPostPreview Post="post"/>
+				<BlogPostPreview Post="post"/>
 		}
 	</div>
 </Authenticate>

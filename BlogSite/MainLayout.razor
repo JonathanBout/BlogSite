@@ -1,5 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.JSInterop.Infrastructure;
+@inherits LayoutComponentBase
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
+
 <header>
 	@if (string.IsNullOrEmpty(arrow))
 	{
@@ -18,37 +21,37 @@
 </main>
 
 @code{
-	bool showItems = false;
-	int ViewportWidth = -1;
-	string arrow = "";
-	const string ArrowUp = "▶";
-	const string ArrowDown = "▼";
-	void UpdateDropdown()
-	{
-		showItems = !showItems;
-		if (showItems)
-		{
-			arrow = ArrowDown;
-		}else
-		{
-			arrow = ArrowUp;
-		}
-		StateHasChanged();
-	}
+    bool showItems = false;
+    int ViewportWidth = -1;
+    string arrow = "";
+    const string ArrowUp = "▶";
+    const string ArrowDown = "▼";
+    void UpdateDropdown()
+    {
+        showItems = !showItems;
+        if (showItems)
+        {
+            arrow = ArrowDown;
+        }else
+        {
+            arrow = ArrowUp;
+        }
+        StateHasChanged();
+    }
 
-	async Task<int> GetPixelWidth()
-	{
-		int vw = await JS.InvokeAsync<int>("GetDeviceWidth");
-		return vw;
-	}
+    async Task<int> GetPixelWidth()
+    {
+        int vw = await JS.InvokeAsync<int>("GetDeviceWidth");
+        return vw;
+    }
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		int vw = await GetPixelWidth();
-		if (vw != ViewportWidth)
-		{
-			ViewportWidth = vw;
-			StateHasChanged();
-		}
-	}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        int vw = await GetPixelWidth();
+        if (vw != ViewportWidth)
+        {
+            ViewportWidth = vw;
+            StateHasChanged();
+        }
+    }
 }

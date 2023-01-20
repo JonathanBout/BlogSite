@@ -1,17 +1,16 @@
 ﻿@page "/{year:int}/{month:int?}/{day:int?}"
-@using BlogSite.Data.Services;
 @using System.Text;
 @using Microsoft.AspNetCore.Components.Forms
-@using System.Text.RegularExpressions;
+@using System.Text.RegularExpressions
 @inject BlogPostLoader BlogPosts
 @inject NavigationManager Navigation
 <h1>@TitleMessage</h1>
 
 <div id="wrapper">
 	<div id="date-stepper">
-		<a href="javascript:void(0)" @onclick='() => Navigate(false)'>◀ prev</a>
+		<a href="javascript:void(0)" @onclick='() => Navigate(false)'>◀</a>
 		<InputText placeholder='@DateTime.Now.ToString("dd-MM-yyyy")' id="stepper-date" @bind-Value:get="DateText" @bind-Value:set="Navigate"/>
-		<a href="javascript:void(0)" @onclick='() => Navigate(true)'>next ▶</a>
+		<a href="javascript:void(0)" @onclick='() => Navigate(true)'>▶</a>
 	</div>
 	@if (string.IsNullOrWhiteSpace(ErrorMessage))
 	{
@@ -111,20 +110,22 @@
 			} catch (ArgumentOutOfRangeException) { }
 		}
 
-		if (Year <= 2000)
+		if (Year <= 2000 || Year > 9999)
 		{
-			ErrorMessage = "Invalid year. It should be more than 2000.";
+			ErrorMessage = "Invalid year. It should be more than 2000 and less than 9999.";
 		}else
 		{
 			if (Month < 1 || Month > 12)
 			{
-				ErrorMessage = "Invalid month. It should be less than 13 and more than 0";
+				ErrorMessage = "Invalid month. It should be less than 13 and more than 0.";
 			}else
 			{
 				int daysInMonth = DateTime.DaysInMonth(Year, Month);
 				if (Day < 1 || Day > daysInMonth)
 				{
-					ErrorMessage = $"Invalid day. It should be less than the amount of days in the month. For the month {Month}/{Year}, that is {daysInMonth} days.";
+					ErrorMessage = "Invalid day. It should be less than the amount "
+					+ $"of days in the month. For the month {Month}/{Year}, "
+					+ $"that is {daysInMonth} days.";
 				}
 			}
 		}
@@ -152,17 +153,31 @@
 		Navigation.NavigateTo(pathToNavigate, true);
 	}
 
+	Regex regex = new Regex(@"^(?>\d\d?-)?(?>\d\d?-)?\d{4}$", RegexOptions.Compiled);
+
 	public void Navigate(string date)
 	{
-		Regex regex = new Regex(@"^(?>\d\d?-)?(?>\d\d?-)?\d{4}$");
-		if (!regex.IsMatch(date))
+		string pathToNavigate;
+		date = date.Replace('/', '-');
+		if (date == "today")
+		{
+			pathToNavigate = DateTime.Now.ToString("yyyy/MM/dd");
+		}
+		else if (date == "yesterday")
+		{
+			pathToNavigate = DateTime.Now.AddDays(-1).ToString("yyyy/MM/dd");
+		}
+		else if (!regex.IsMatch(date))
 		{
 			Navigation.Reload();
 			return;
 		}
-		string[] splits = date.Split("-");
-		splits = splits.Reverse().ToArray();
-		string pathToNavigate = string.Join('/', splits);
+		else
+		{
+			string[] splits = date.Split("-");
+			splits = splits.Reverse().ToArray();
+			pathToNavigate = string.Join('/', splits);
+		}
 		Navigation.NavigateTo("/" + pathToNavigate, true);
 	}
 }

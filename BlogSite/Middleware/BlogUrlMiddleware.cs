@@ -1,15 +1,15 @@
 ﻿using BlogSite.Data;
-using BlogSite.Data.Services;
+using BlogSite.Services;
 
 namespace BlogSite.Middleware
 {
-	public class BlogUrlMiddleware : IMiddleware
+    public class BlogUrlMiddleware : IMiddleware
 	{
 		BlogPostLoader PostLoader { get; }
 		public BlogUrlMiddleware(BlogPostLoader postLoader)
 		{
 			PostLoader = postLoader;
-		}
+		}	
 
 		public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 		{

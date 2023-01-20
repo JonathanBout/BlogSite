@@ -72,6 +72,14 @@ a:hover{
     scroll-margin-top: 25vmin;
 }
 
+#stepper-date {
+    flex: 1;
+    text-align: center;
+    margin: -2px 5px;
+    border: none;
+    border-radius: 5px;
+}
+
 @media (max-width: 700px) {
     [id] {
         scroll-margin-top: 40vmin;
