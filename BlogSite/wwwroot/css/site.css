@@ -90,8 +90,28 @@ h1, h2{
     letter-spacing: -1px;
 }
 
+a.button:hover{
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
 @media (hover: none) {
     :hover {
         transform: none;
     }
+}
+
+.spacer{
+    flex: 1;
+}
+
+a.button{
+    font-size: 20px;
+    border: none;
+    padding: 5px;
+    background-color: #3333;
+    color: #FFF;
+    border-radius: 10px;
+    text-decoration: none;
+    appearance: button;
 }

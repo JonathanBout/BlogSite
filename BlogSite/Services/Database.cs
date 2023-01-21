@@ -1,29 +1,8 @@
-﻿using BlogSite.Data;
-using LiteDB;
+﻿using LiteDB;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Reflection;
 
-//var db = new LiteDatabase("C:\\Users\\Public\\Documents\\database.db");
-//ILiteCollection<Data> data = db.GetCollection<Data>();
-//data.Insert(new Data(0, "Hello, World!"));
-//data.Insert(new Data(0, "Hello, World the 2nd!"));
-//var dataArray = data.FindAll().ToArray();
-//Console.ReadLine();
-//class Data
-//{
-//	public int Id { get; set; }
-//	public string Content { get; set; }
-
-//	[BsonCtor]
-//	public Data(int id, string content)
-//	{
-//		Id = id;
-//		Content = content;
-//	}
-//}
-
-
-
-namespace BlogSite.Services
+namespace BlogSite.Data
 {
     public class Database : IDisposable
     {
@@ -31,7 +10,9 @@ namespace BlogSite.Services
         public Database()
         {
             DB = new LiteDatabase((OperatingSystem.IsWindows() ?
-                Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "\\" : "/srv/") + "blogdata"
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + "\\" : "/srv/")
+                + Assembly.GetExecutingAssembly().GetName().Name
+                + "-Database"
 #if DEBUG
                 + ".debug"
 #endif

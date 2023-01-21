@@ -1,24 +1,55 @@
-﻿@if (Authenticated)
+﻿@implements IDisposable
+@if (Authenticated)
 {
 	@ChildContent
 }
-else
+else if (!TriedAuthentication)
 {
-	<b>Authenticating...</b>
+	AuthenticateUser();
+	<p>Authenticating...</p>
+}else
+{
+	@if(NotAuthenticatedString is null)
+	{
+		<p>You are not logged in. <a>Login</a> or <a>Register</a> to continue.</p>
+	}else
+	{
+		@NotAuthenticatedString
+	}
 }
 @code {
-	bool Authenticated { get; set; } = false;
-
+	bool Authenticated => CurrentUser.Value is not null;
+	bool TriedAuthentication { get; set; } = false;
 	[Parameter]
 	public RenderFragment ChildContent { get; set; } = null!;
+	[Parameter]
+	public MarkupString? NotAuthenticatedString { get; set; } = null;
+	[CascadingParameter]
+	public CascadingObject<User> CurrentUser { get; set; } = null!;
+
+	protected override void OnInitialized()
+	{
+		CurrentUser.ValueChanged += StateHasChanged;
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			Authenticated = true;
 			StateHasChanged();
 		}
 		await base.OnAfterRenderAsync(firstRender);
+	}
+
+	void IDisposable.Dispose()
+	{
+		CurrentUser.ValueChanged -= StateHasChanged;
+	}
+
+	void AuthenticateUser()
+	{
+		//Load user information from cookie/localstorage/sessionstorage
+		//try to authenticate, if success set CurrentUser.Value
+		TriedAuthentication = true;
 	}
 }

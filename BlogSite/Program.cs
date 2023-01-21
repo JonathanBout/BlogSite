@@ -4,6 +4,7 @@ using BlogSite.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Collections.Specialized;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -23,6 +24,7 @@ internal static partial class Program
 		builder.Services.AddServerSideBlazor();
 		builder.Services.AddSingleton<Database>();
 		builder.Services.AddSingleton<BlogPostLoader>();
+		builder.Services.AddSingleton<UserManager>();
 		builder.Services.AddTransient<BlogUrlMiddleware>();
 		builder.WebHost.UseStaticWebAssets();
 		var app = builder.Build();
@@ -166,5 +168,22 @@ internal static partial class Program
     public static string QueryString(this NavigationManager navigationManager, string key)
     {
         return navigationManager.QueryString()[key]??"";
+    }
+
+    public static T? QueryString<T>(this NavigationManager navigationManager, string key, T? defaultValue = default)
+    {
+		var value = navigationManager.QueryString(key);
+		if (value is not null)
+		{
+			var isParsable = typeof(T).GetInterfaces().Any(c => c.IsGenericType && c.GetGenericTypeDefinition() == typeof(IParsable<>));
+			if (isParsable)
+			{
+				var parse = typeof(T).GetMethods(BindingFlags.Static | BindingFlags.Public)
+					.FirstOrDefault(c => c.Name == "Parse" && c.GetParameters().Length == 2 && c.GetParameters()[0].ParameterType == typeof(string) && c.GetParameters()[1].ParameterType == typeof(IFormatProvider));
+				if (parse != null)
+					return (T?)parse.Invoke(null, new object[] { value, null! });
+			}
+		}
+		return defaultValue;
     }
 }

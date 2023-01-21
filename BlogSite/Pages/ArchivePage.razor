@@ -1,4 +1,5 @@
 ﻿@page "/{year:int}/{month:int?}/{day:int?}"
+@page "/archive/{year:int}/{month:int?}/{day:int?}"
 @using System.Text;
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Text.RegularExpressions
@@ -58,15 +59,15 @@
 	public string DateText {
 		get
 		{
-			StringBuilder stringBuilder = new StringBuilder(Year.ToString());
+			StringBuilder stringBuilder = new StringBuilder(Year.ToString("D4"));
 			if (Month > 0)
 			{
 				stringBuilder.Insert(0, "-");
-				stringBuilder.Insert(0, Month);
+				stringBuilder.Insert(0, Month.ToString("D2"));
 				if (Day > 0)
 				{
 					stringBuilder.Insert(0, "-");
-					stringBuilder.Insert(0, Day);
+					stringBuilder.Insert(0, Day.ToString("D3"));
 				}
 			}
 			return stringBuilder.ToString();
@@ -101,18 +102,18 @@
 				return BlogPosts.GetPosts(startDate: date, new DateTime(date.Year, date.Month, date.MonthLength()));
 			} catch (ArgumentOutOfRangeException) { }
 		}
-		else if (Year > 2000)
+		else if (Year > 0)
 		{
 			try {
 				var date = new DateTime(Year, 1, 1);
-				TitleMessage = $"Posts from " + date.ToString("yyyy");
+				TitleMessage = $"Posts from the year " + date.ToString("yyyy");
 				return BlogPosts.GetPosts(startDate: date, new DateTime(date.Year, 12, 31));
 			} catch (ArgumentOutOfRangeException) { }
 		}
 
 		if (Year <= 2000 || Year > 9999)
 		{
-			ErrorMessage = "Invalid year. It should be more than 2000 and less than 9999.";
+			ErrorMessage = "Invalid year. It should be more than 0 and less than 10000.";
 		}else
 		{
 			if (Month < 1 || Month > 12)
@@ -120,7 +121,13 @@
 				ErrorMessage = "Invalid month. It should be less than 13 and more than 0.";
 			}else
 			{
-				int daysInMonth = DateTime.DaysInMonth(Year, Month);
+				int daysInMonth = -1;
+				try
+				{
+					daysInMonth = DateTime.DaysInMonth(Year, Month);
+				}
+				catch (ArgumentOutOfRangeException) { }
+
 				if (Day < 1 || Day > daysInMonth)
 				{
 					ErrorMessage = "Invalid day. It should be less than the amount "
@@ -137,20 +144,25 @@
 	{
 		string pathToNavigate = "";
 		int change = forward ? 1 : -1;
-
-		if (Day > 0)
+		try
 		{
-			DateTime dt = new DateTime(Year, Month, Day).AddDays(change);
-			pathToNavigate = $"/{dt.Year}/{dt.Month}/{dt.Day}";
-		}else if (Month > 0)
+			if (Day > 0)
+			{
+				DateTime dt = new DateTime(Year, Month, Day).AddDays(change);
+				pathToNavigate = $"/{dt.Year}/{dt.Month}/{dt.Day}";
+			}else if (Month > 0)
+			{
+				DateTime dt = new DateTime(Year, Month, 1).AddMonths(change);
+				pathToNavigate = $"/{dt.Year}/{dt.Month}";
+			}else
+			{
+				pathToNavigate = $"/{Year + change}";
+			}
+			Navigation.NavigateTo(pathToNavigate, true);
+		}catch (ArgumentOutOfRangeException)
 		{
-			DateTime dt = new DateTime(Year, Month, 1).AddMonths(change);
-			pathToNavigate = $"/{dt.Year}/{dt.Month}";
-		}else
-		{
-			pathToNavigate = $"/{Year + change}";
+			ErrorMessage = "Can't navigate to a date before January 1st in the year 1, or to a date after December 31st in the year 9999.";
 		}
-		Navigation.NavigateTo(pathToNavigate, true);
 	}
 
 	Regex regex = new Regex(@"^(?>\d\d?-)?(?>\d\d?-)?\d{4}$", RegexOptions.Compiled);

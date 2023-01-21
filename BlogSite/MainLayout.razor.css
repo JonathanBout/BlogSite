@@ -4,6 +4,7 @@
 	flex-direction: row;
 	align-items: center;
 	padding: 10px;
+	padding-right: 15px;
 	top: 0;
 	background-color: var(--primary-color);
 	color: var(--primary-text-color);
@@ -59,6 +60,10 @@ main {
 
 	#dropdown-button {
 		display: block;
+	}
+
+	.spacer {
+		display: none;
 	}
 }
 

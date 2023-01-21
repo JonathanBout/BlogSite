@@ -2,78 +2,94 @@
 @inherits LayoutComponentBase
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
-
+@implements IDisposable
+<CascadingValue Value="@CurrentUser">
 <header>
 	<a href="/">@GetType().Assembly.GetName().Name!.Humanize()</a>
-	<a @onclick='UpdateDropdown' id="dropdown-button"><span style="font-family: 'Cascadia Code', Courier New, Courier, monospace;">@arrow</span> Menu</a>
+	<a @onclick='() => UpdateDropdown()' id="dropdown-button"><span style="font-family: 'Cascadia Code', Courier New, Courier, monospace;">@arrow</span> Menu</a>
 	@if (showItems || ViewportWidth > 700 || ViewportWidth < 0)
 	{
 		<a class="dropdown-item" href="/Latest">Latest</a>
 		<a class="dropdown-item" href="/Archive">Archive</a>
+		<div class="spacer"></div>
+		var notLoggedInMarkup = new MarkupString("<a class='button' href='/Account'>Login</a>");
+		<Authenticate NotAuthenticatedString='notLoggedInMarkup'>
+			<a class="dropdown-item" href="/Account">Account</a>
+		</Authenticate>
 	}
 </header>
 <main>
-	@Body
+		@Body
 </main>
+</CascadingValue>
 
 @code{
+	bool showItems = false;
+	int ViewportWidth = -1;
+	string arrow = "";
+	const string ArrowUp = "▶";
+	const string ArrowDown = "▼";
+	public CascadingObject<User> CurrentUser { get; set; } = new CascadingObject<User>();
 
-    bool showItems = false;
-    int ViewportWidth = -1;
-    string arrow = "";
-    const string ArrowUp = "▶";
-    const string ArrowDown = "▼";
+	bool UpdateDropdown(bool expanded)
+	{
+		showItems = expanded;
+		return UpdateArrow(showItems);
+	}
 
-    void UpdateDropdown(bool expanded)
-    {
-        showItems = expanded;
-        UpdateArrow(showItems);
-    }
+	bool UpdateDropdown()
+	{
+		showItems = !showItems;
+		return UpdateArrow(showItems);
+	}
 
-    void UpdateDropdown()
-    {
-        showItems = !showItems;
-        UpdateArrow(showItems);
-    }
+	bool UpdateArrow(bool up)
+	{
+		if (up)
+		{
+			if (arrow == ArrowDown) return false;
+			arrow = ArrowDown;
+		}
+		else
+		{
+			if (arrow == ArrowUp) return false;
+			arrow = ArrowUp;
+		}
+		StateHasChanged();
+		return true;
+	}
 
-    void UpdateArrow(bool up)
-    {
-        if (up)
-        {
-            if (arrow == ArrowDown) return;
-            arrow = ArrowDown;
-        }
-        else
-        {
-            if (arrow == ArrowUp) return;
-            arrow = ArrowUp;
-        }
-    }
+	async Task<int> GetPixelWidth()
+	{
+		int vw = await JS.InvokeAsync<int>("GetDeviceWidth");
+		return vw;
+	}
 
-    async Task<int> GetPixelWidth()
-    {
-        int vw = await JS.InvokeAsync<int>("GetDeviceWidth");
-        return vw;
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		CurrentUser.ValueChanged += StateHasChanged;
+		UpdateDropdown(false);
+		await JS.InvokeVoidAsync("GLOBAL.SetDotnetReference", DotNetObjectReference.Create(this));
+	}
 
-    protected override void OnInitialized()
-    {
-        UpdateDropdown(true);
-    }
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		int vw = await GetPixelWidth();
+		if (vw != ViewportWidth)
+		{
+			ViewportWidth = vw;
+			StateHasChanged();
+		}
+	}
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        int vw = await GetPixelWidth();
-        if (vw != ViewportWidth)
-        {
-            ViewportWidth = vw;
-            StateHasChanged();
-        }
-    }
+	[JSInvokable(nameof(Resize))]
+	public void Resize()
+	{
+		StateHasChanged();
+	}
 
-    [JSInvokable(nameof(Resize))]
-    public void Resize()
-    {
-        StateHasChanged();
-    }
+	void IDisposable.Dispose()
+	{
+		CurrentUser.ValueChanged -= StateHasChanged;
+	}
 }

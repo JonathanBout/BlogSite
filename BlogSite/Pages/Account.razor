@@ -1,0 +1,7 @@
+﻿@page "/Account"
+@inject UserManager Users
+<h1>Your Account</h1>
+@foreach(User user in Users.GetUsers())
+{
+	<p>@user.ToString()</p>
+}
