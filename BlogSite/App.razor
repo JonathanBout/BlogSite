@@ -1,11 +1,15 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@using System.Net;
+@{
+    var mainLayoutType = typeof(MainLayout);
+}
+<Router AppAssembly="@GetType().Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <RouteView RouteData="@routeData" DefaultLayout="@mainLayoutType" />
     </Found>
     <NotFound>
         <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <BlogSite.Components.ErrorView ErrorCode="System.Net.HttpStatusCode.NotFound"/>
+        <LayoutView Layout="@mainLayoutType">
+            <BlogSite.Components.ErrorView ErrorCode="HttpStatusCode.NotFound"/>
         </LayoutView>
     </NotFound>
 </Router>
