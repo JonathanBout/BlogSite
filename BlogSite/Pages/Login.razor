@@ -1,0 +1,55 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using System.Text;
+@page "/Login/{RedirectTo?}"
+@inject LoginManager LoginManager
+@inject NavigationManager Navigation
+@inject ProtectedLocalStorage LocalStorage
+@inject ProtectedSessionStorage SessionStorage
+
+<h1>Login</h1>
+<EditForm Model="LoginData" OnValidSubmit="Submit">
+	<InputText DisplayName="Username" @bind-Value="@LoginData.Username"/>
+	<InputText DisplayName="Password" @bind-Value="@LoginData.Password" type='password'/>
+	<InputCheckbox DisplayName="Remember Me" @bind-Value="@LoginData.RememberMe"/>
+	<button type="submit">Login</button>
+	<DataAnnotationsValidator />
+	<ValidationSummary/>
+</EditForm>
+
+@code {
+	LoginFormData LoginData { get; set; } = new();
+	[Parameter]
+	public string RedirectTo { get; set; } = "/";
+	[CascadingParameter]
+	public CascadingObject<User> CurrentUser { get; set; } = null!;
+
+	public string ErrorMessage { get; set; } = "";
+
+	async Task Submit(EditContext context)
+	{
+		ErrorMessage = "";
+		// Login
+		if (LoginManager.TryLogin(LoginData.Username, LoginData.Password, out User? value))
+		{
+			if (value is null)
+			{
+				ErrorMessage = "Incorrect password.";
+			}else
+			{
+				CurrentUser.Value = value;
+
+				string valueToStore = Encoding.UTF8.GetString(BitConverter.GetBytes(value.Id));
+				valueToStore += "-" + PasswordHash.Hash(value.PasswordHash);
+				if (LoginData.RememberMe)
+					await LocalStorage.SetAsync("userinfo", valueToStore);
+
+				await SessionStorage.SetAsync("userinfo", valueToStore);
+				Navigation.NavigateTo(RedirectTo ?? "/");
+			}
+		}else
+		{
+			ErrorMessage = "Incorrect username.";
+		}
+	}
+}

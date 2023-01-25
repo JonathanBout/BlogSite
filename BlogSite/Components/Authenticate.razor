@@ -1,29 +1,40 @@
-﻿@implements IDisposable
-@if (Authenticated)
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@implements IDisposable
+@inject ProtectedLocalStorage LocalStorage
+@inject ProtectedSessionStorage SessionStorage
+@inject LoginManager Login
+@if (IsAuthenticated)
 {
-	@ChildContent
+	@Authenticated
 }
 else if (!TriedAuthentication)
 {
-	AuthenticateUser();
-	<p>Authenticating...</p>
+	if (Authenticating is null)
+	{
+		<p>Authenticating...</p>
+	}else
+	{
+		@Authenticating
+	}
 }else
 {
-	@if(NotAuthenticatedString is null)
+	@if(NotAuthenticated is null)
 	{
 		<p>You are not logged in. <a>Login</a> or <a>Register</a> to continue.</p>
 	}else
 	{
-		@NotAuthenticatedString
+		@NotAuthenticated
 	}
 }
 @code {
-	bool Authenticated => CurrentUser.Value is not null;
+	bool IsAuthenticated => CurrentUser.Value is not null;
 	bool TriedAuthentication { get; set; } = false;
+	[Parameter, EditorRequired]
+	public RenderFragment Authenticated { get; set; } = null!;
 	[Parameter]
-	public RenderFragment ChildContent { get; set; } = null!;
+	public RenderFragment? NotAuthenticated { get; set; } = null;
 	[Parameter]
-	public MarkupString? NotAuthenticatedString { get; set; } = null;
+	public RenderFragment? Authenticating { get; set; } = null;
 	[CascadingParameter]
 	public CascadingObject<User> CurrentUser { get; set; } = null!;
 
@@ -32,13 +43,13 @@ else if (!TriedAuthentication)
 		CurrentUser.ValueChanged += StateHasChanged;
 	}
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	protected override async Task OnInitializedAsync()
 	{
-		if (firstRender)
+		if (CurrentUser.Value is null &&! TriedAuthentication)
 		{
-			StateHasChanged();
+			await TryAutoAuthenticate();
 		}
-		await base.OnAfterRenderAsync(firstRender);
+		await base.OnInitializedAsync();
 	}
 
 	void IDisposable.Dispose()
@@ -46,10 +57,28 @@ else if (!TriedAuthentication)
 		CurrentUser.ValueChanged -= StateHasChanged;
 	}
 
-	void AuthenticateUser()
+	async Task TryAutoAuthenticate()
 	{
-		//Load user information from cookie/localstorage/sessionstorage
-		//try to authenticate, if success set CurrentUser.Value
 		TriedAuthentication = true;
+		var info = await SessionStorage.GetAsync<string>("userinfo");
+		if (!Try(info))
+		{
+			info = await LocalStorage  .GetAsync<string>("userinfo");
+			if (!Try(info)) return;
+		}
+		StateHasChanged();
+	}
+
+	bool Try(ProtectedBrowserStorageResult<string> info)
+	{
+		if (info.Success && info.Value is not null)
+		{
+			if (Login.TryLogin(info.Value, out User? result) && result is not null)
+			{
+				CurrentUser.Value = result;
+				return true;
+			}
+		}
+		return false;
 	}
 }

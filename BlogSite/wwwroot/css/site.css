@@ -105,7 +105,7 @@ a.button:hover{
     flex: 1;
 }
 
-a.button{
+.button{
     font-size: 20px;
     border: none;
     padding: 5px;
@@ -114,4 +114,9 @@ a.button{
     border-radius: 10px;
     text-decoration: none;
     appearance: button;
+}
+
+a.nolink {
+    text-decoration: none;
+    color: var(--primary-text-color);
 }

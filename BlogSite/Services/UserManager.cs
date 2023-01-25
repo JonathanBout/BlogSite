@@ -24,7 +24,8 @@ namespace BlogSite.Services
 					Random.Shared.Word(),
 					Random.Shared.Word(),
 					Random.Shared.Word() + "@" + Random.Shared.Word() + ".com",
-					PasswordHash.Hash("hello"));
+					PasswordHash.Hash("hello"),
+					Random.Shared.Word());
 			}
 			Console.WriteLine("Done in {0:n2} milliseconds. ({1:n2} milliseconds per item)", sw.Elapsed.TotalMilliseconds, (double)sw.Elapsed.TotalMilliseconds/generatedUsers.Length);
 			Users.InsertBulk(generatedUsers);

@@ -1,7 +1,24 @@
 ﻿@page "/Account"
-@inject UserManager Users
-<h1>Your Account</h1>
-@foreach(User user in Users.GetUsers())
-{
-	<p>@user.ToString()</p>
+<Authenticate @ref="Authenticator">
+	<Authenticated>
+		<h1>Your Account</h1>
+		@if (Authenticator is not null)
+		{
+			<p>
+				Username: @CurrentUser.Value!.Username
+			</p>
+			<p>
+				Full Name: @CurrentUser.Value!.ToString()
+			</p>
+		}
+	</Authenticated>
+	<NotAuthenticated>
+		<Redirect Url="/Login" AppendCurrentUrl="true"/>
+	</NotAuthenticated>
+</Authenticate>
+
+@code{
+	Authenticate? Authenticator { get; set; } = null;
+	[CascadingParameter]
+	public CascadingObject<User> CurrentUser { get; set; } = null!;
 }

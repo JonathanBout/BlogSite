@@ -25,6 +25,7 @@ internal static partial class Program
 		builder.Services.AddSingleton<Database>();
 		builder.Services.AddSingleton<BlogPostLoader>();
 		builder.Services.AddSingleton<UserManager>();
+		builder.Services.AddSingleton<LoginManager>();
 		builder.Services.AddTransient<BlogUrlMiddleware>();
 		builder.WebHost.UseStaticWebAssets();
 		var app = builder.Build();

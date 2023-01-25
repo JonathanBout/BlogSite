@@ -10,9 +10,12 @@ namespace BlogSite.Data
 		public string MiddleName { get; set; }
 		public string Email { get; set; }
 		public string PasswordHash { get; set; }
+		public string Username { get; set; }
+
+		public User() : this(0, "", "", "", "", "", "") { }
 
 		[BsonCtor]
-		public User(int id, string firstName, string lastName, string middleName, string email, string passwordHash)
+		public User(int id, string firstName, string lastName, string middleName, string email, string passwordHash, string username)
 		{
 			Id = id;
 			FirstName = firstName;
@@ -20,6 +23,7 @@ namespace BlogSite.Data
 			MiddleName = middleName;
 			Email = email;
 			PasswordHash = passwordHash;
+			Username = username;
 		}
 
 		public override string ToString()

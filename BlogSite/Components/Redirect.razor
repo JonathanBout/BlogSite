@@ -1,0 +1,15 @@
+﻿@inject NavigationManager Navigation
+@code {
+	[Parameter, EditorRequired]
+	public string Url { get; set; } = "";
+	[Parameter]
+	public bool AppendCurrentUrl { get; set; } = false;
+
+	protected override void OnInitialized()
+	{
+		string urlToNavigate = Url;
+		if (AppendCurrentUrl)
+			urlToNavigate = Path.Join(urlToNavigate, Navigation.ToBaseRelativePath(Navigation.Uri));
+		Navigation.NavigateTo(urlToNavigate);
+	}
+}

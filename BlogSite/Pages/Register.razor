@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@page "/Register/{RedirectTo?}"
+@inject LoginManager LoginManager
+@inject NavigationManager Navigation
+<h1>Register</h1>
+<EditForm Model="LoginData" OnValidSubmit="Submit">
+	<InputText DisplayName="Username" @bind-Value="@LoginData.Username" />
+	<InputText DisplayName="First Name" @bind-Value="@LoginData.FirstName" />
+	<InputText DisplayName="Middle Name" @bind-Value="@LoginData.MiddleName" />
+	<InputText DisplayName="Last Name" @bind-Value="@LoginData.LastName" />
+	<InputText DisplayName="E-mail" @bind-Value="@LoginData.Email" />
+	<InputText DisplayName="Password" @bind-Value="@LoginData.Password" type='password' />
+	<InputText DisplayName="Confirm Password" @bind-Value="@LoginData.ConfirmPassword" type='password' />
+	<button type="submit">Register</button>
+	<DataAnnotationsValidator />
+	<ValidationSummary/>
+	@ErrorMessage
+</EditForm>
+@code {
+	RegisterFormData LoginData { get; set; } = new();
+	[Parameter]
+	public string RedirectTo { get; set; } = "/";
+	[CascadingParameter]
+	public CascadingObject<User> CurrentUser { get; set; } = null!;
+	public string ErrorMessage { get; set; } = "";
+
+	void Submit(EditContext context)
+	{
+		ErrorMessage = "";
+		// Register
+		if (LoginManager.TryCreateUser(LoginData.Username, LoginData.Password,
+			LoginData.FirstName, LoginData.MiddleName, LoginData.MiddleName,
+			LoginData.Email) is User user)
+		{
+			CurrentUser.Value = user;
+			Navigation.NavigateTo(RedirectTo??"/");
+		}else
+		{
+			ErrorMessage = "An user with this e-mail address or username does already exist in our database.";
+		}
+	}
+}

@@ -9,13 +9,19 @@
 	<a @onclick='() => UpdateDropdown()' id="dropdown-button"><span style="font-family: 'Cascadia Code', Courier New, Courier, monospace;">@arrow</span> Menu</a>
 	@if (showItems || ViewportWidth > 700 || ViewportWidth < 0)
 	{
-		<a class="dropdown-item" href="/Latest">Latest</a>
-		<a class="dropdown-item" href="/Archive">Archive</a>
+		<a href="/Latest">Latest</a>
+		<a href="/Archive/@(DateTime.Now.Year - 1)">Archive</a>
 		<div class="spacer"></div>
-		var notLoggedInMarkup = new MarkupString("<a class='button' href='/Account'>Login</a>");
-		<Authenticate NotAuthenticatedString='notLoggedInMarkup'>
-			<a class="dropdown-item" href="/Account">Account</a>
-		</Authenticate>
+		<div class="button">
+			<Authenticate>
+				<Authenticated>
+					<a class="nolink" href="/Account">Account</a>
+				</Authenticated>
+				<NotAuthenticated>
+					<a class='nolink' href='/Login'>Login</a>
+				</NotAuthenticated>
+			</Authenticate>
+		</div>
 	}
 </header>
 <main>

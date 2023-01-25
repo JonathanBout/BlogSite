@@ -9,9 +9,9 @@
 
 <div id="wrapper">
 	<div id="date-stepper">
-		<a href="javascript:void(0)" @onclick='() => Navigate(false)'>◀</a>
+		<a @onclick='() => Navigate(false)'>◀</a>
 		<InputText placeholder='@DateTime.Now.ToString("dd-MM-yyyy")' id="stepper-date" @bind-Value:get="DateText" @bind-Value:set="Navigate"/>
-		<a href="javascript:void(0)" @onclick='() => Navigate(true)'>▶</a>
+		<a @onclick='() => Navigate(true)'>▶</a>
 	</div>
 	@if (string.IsNullOrWhiteSpace(ErrorMessage))
 	{
@@ -165,7 +165,7 @@
 		}
 	}
 
-	Regex regex = new Regex(@"^(?>\d\d?-)?(?>\d\d?-)?\d{4}$", RegexOptions.Compiled);
+	static readonly Regex regex = new Regex(@"^(?>\d\d?-)?(?>\d\d?-)?\d{4}$", RegexOptions.Compiled);
 
 	public void Navigate(string date)
 	{
