@@ -7,6 +7,7 @@
 		CreationDate = 2,
 		ContentPreview = 4,
 		TimeToRead = 8,
+		Author = 16,
 		All = ~Hidden
 	}
 }

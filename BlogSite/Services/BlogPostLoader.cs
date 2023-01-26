@@ -1,5 +1,6 @@
 ﻿using BlogSite.Data;
 using LiteDB;
+using LiteDB.Engine;
 using Microsoft.AspNetCore.Components;
 namespace BlogSite.Services
 {
@@ -9,22 +10,9 @@ namespace BlogSite.Services
         public BlogPostLoader(Database database)
         {
             BlogPosts = database.GetCollection<BlogPost>();
-#if DEBUG
-            BlogPosts.DeleteAll();
-            var generatedPosts = new BlogPost[Random.Shared.Next(11, 100)];
-            for (int i = 0; i < generatedPosts.Length; i++)
-            {
-                generatedPosts[i] = new BlogPost(
-                    Random.Shared.Paragraph(3, 7) + " [TEST]",
-                    DateTime.Now - TimeSpan.FromTicks(Random.Shared.NextInt64(1, (long)1e14 * 4)),
-                    Random.Shared.Paragraph(),
-                    Random.Shared.Paragraphs());
-            }
-            BlogPosts.InsertBulk(generatedPosts);
-#endif
         }
 
-        public BlogPost[] GetPosts(DateTime? startDate = null, DateTime? endDate = null, string? searchText = null, int maxCount = 0)
+        public BlogPost[] GetPosts(DateTime? startDate = null, DateTime? endDate = null, string? searchText = null, int maxCount = 0, int authorId = 0)
         {
             var query = BlogPosts.Query().OrderByDescending(x => x.PublishedOn);
             if (!string.IsNullOrEmpty(searchText))
@@ -33,7 +21,8 @@ namespace BlogSite.Services
                 query = query.Where(x => x.PublishedOn.Date <= endDate.Value.Date);
             if (startDate is not null)
                 query = query.Where(x => x.PublishedOn.Date >= startDate.Value.Date);
-
+            if (authorId > 0)
+                query = query.Where(x => x.Author.Id == authorId);
             //should be the last as Limit() does not return an ILiteQueryable<T>.
             if (maxCount > 0)
                 return query.Limit(maxCount).ToArray();
@@ -44,6 +33,16 @@ namespace BlogSite.Services
         public BlogPost GetBlogPost(int id)
         {
             return BlogPosts.FindById(id);
+        }
+
+        public void UploadBlogPost(BlogPost blogPost)
+        {
+            BlogPosts.Insert(blogPost);
+        }
+
+        public void UpdateBlogPost(BlogPost blogPost)
+        {
+            BlogPosts.Update(blogPost);
         }
     }
 }

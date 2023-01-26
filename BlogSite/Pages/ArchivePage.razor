@@ -9,9 +9,9 @@
 
 <div id="wrapper">
 	<div id="date-stepper">
-		<a @onclick='() => Navigate(false)'>◀</a>
+		<a @onclick='() => Navigate(Backwards)'>◀</a>
 		<InputText placeholder='@DateTime.Now.ToString("dd-MM-yyyy")' id="stepper-date" @bind-Value:get="DateText" @bind-Value:set="Navigate"/>
-		<a @onclick='() => Navigate(true)'>▶</a>
+		<a @onclick='() => Navigate(Forwards)'>▶</a>
 	</div>
 	@if (string.IsNullOrWhiteSpace(ErrorMessage))
 	{
@@ -35,6 +35,9 @@
 </div>
 
 @code {
+	const bool Forwards = true;
+	const bool Backwards = false;
+
 	[Parameter]
 	public int Year { get; set; } = -1;
 	[Parameter]
@@ -67,7 +70,7 @@
 				if (Day > 0)
 				{
 					stringBuilder.Insert(0, "-");
-					stringBuilder.Insert(0, Day.ToString("D3"));
+					stringBuilder.Insert(0, Day.ToString("D2"));
 				}
 			}
 			return stringBuilder.ToString();

@@ -1,0 +1,21 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@inherits Microsoft.AspNetCore.Components.Forms.InputText
+<div style="margin-top: 10px; margin-bottom: 5px;">
+	<label>
+		<span>
+			@DisplayName
+		</span>
+		<input @attributes="AdditionalAttributes"
+				name="@DisplayName?.Browserize()"
+				class="@CssClass"
+				value="@CurrentValue"
+				autocomplete="@AutoCompleteName"
+				@oninput="EventCallback.Factory.CreateBinder<string?>(this, value => CurrentValueAsString = value, CurrentValueAsString)" />
+				<ValidationMessage For="ValueExpression" />
+	</label>
+</div>
+
+@code{
+	[Parameter]
+	public string AutoCompleteName { get; set; } = "";
+}

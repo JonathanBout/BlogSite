@@ -11,14 +11,18 @@ else if (!TriedAuthentication)
 {
 	if (Authenticating is null)
 	{
-		<p>Authenticating...</p>
+		<span>Authenticating...</span>
 	}else
 	{
 		@Authenticating
 	}
 }else
 {
-	@if(NotAuthenticated is null)
+	@if(RedirectIfNotAuthenticated)
+	{
+		<Redirect Url="/Login" AppendCurrentUrl="true"/>
+	}
+	else if (NotAuthenticated is null)
 	{
 		<p>You are not logged in. <a>Login</a> or <a>Register</a> to continue.</p>
 	}else
@@ -35,6 +39,9 @@ else if (!TriedAuthentication)
 	public RenderFragment? NotAuthenticated { get; set; } = null;
 	[Parameter]
 	public RenderFragment? Authenticating { get; set; } = null;
+	[Parameter]
+	public bool RedirectIfNotAuthenticated { get; set; } = false;
+
 	[CascadingParameter]
 	public CascadingObject<User> CurrentUser { get; set; } = null!;
 
@@ -43,13 +50,13 @@ else if (!TriedAuthentication)
 		CurrentUser.ValueChanged += StateHasChanged;
 	}
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (CurrentUser.Value is null &&! TriedAuthentication)
+		if (CurrentUser.Value is null && firstRender)
 		{
 			await TryAutoAuthenticate();
 		}
-		await base.OnInitializedAsync();
+		TriedAuthentication = true;
 	}
 
 	void IDisposable.Dispose()
@@ -59,7 +66,6 @@ else if (!TriedAuthentication)
 
 	async Task TryAutoAuthenticate()
 	{
-		TriedAuthentication = true;
 		var info = await SessionStorage.GetAsync<string>("userinfo");
 		if (!Try(info))
 		{

@@ -1,0 +1,24 @@
+﻿@page "/Account/Posts"
+@inject BlogPostLoader Posts
+<h1>My Posts</h1>
+<Authenticate RedirectIfNotAuthenticated="true">
+	<Authenticated>
+		@{
+			var posts = Posts.GetPosts(authorId: CurrentUser.Value!.Id);
+		}
+		@if (posts.Length == 0)
+		{
+			<p>You do not have any blog posts, but you can <a href="/Account/Write">start writing now</a>!</p>
+		}else
+		{
+			@foreach(var post in posts)
+			{
+				<BlogPostPreview Post="post" />
+			}
+		}
+	</Authenticated>
+</Authenticate>
+@code {
+	[CascadingParameter]
+	public CascadingObject<User> CurrentUser { get; set; } = null!;
+}

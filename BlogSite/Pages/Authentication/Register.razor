@@ -1,0 +1,77 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@page "/Register/{*RedirectTo}"
+@inject LoginManager LoginManager
+@inject NavigationManager Navigation
+@implements IDisposable
+<h1>Register</h1>
+<EditForm Model="LoginData" OnValidSubmit="Submit">
+	<DataAnnotationsValidator />
+	<BetterInputText DisplayName="Username" @bind-Value="@LoginData.Username" />
+	<BetterInputText DisplayName="First Name" AutoCompleteName="First Name" @bind-Value="@LoginData.FirstName" />
+	<BetterInputText DisplayName="Middle Name" AutoCompleteName="Middle Name" @bind-Value="@LoginData.MiddleName" />
+	<BetterInputText DisplayName="Last Name" AutoCompleteName="Last Name" @bind-Value="@LoginData.LastName" />
+	<BetterInputText DisplayName="E-mail" AutoCompleteName="Email" @bind-Value="@LoginData.Email" />
+	<BetterInputText DisplayName="Password" id="password" AutoCompleteName="Password" @bind-Value="@LoginData.Password" type='password' />
+	<BetterInputText DisplayName="Confirm Password" id="passwordConfirm" @bind-Value="@LoginData.ConfirmPassword" type='password' />
+	<p>Already have an account? <a href="/Login">Log in!</a></p>
+	<button type="submit">Register</button>
+	@ErrorMessage
+</EditForm>
+@code {
+	RegisterFormData LoginData { get; set; } = new();
+	[Parameter]
+	public string RedirectTo { get; set; } = "/";
+	[CascadingParameter]
+	public CascadingObject<User> CurrentUser { get; set; } = null!;
+	public string ErrorMessage { get; set; } = "";
+
+	protected override void OnParametersSet()
+	{
+		CurrentUser.ValueChanged += Redirect;
+		Redirect(false);
+	}
+
+	protected override void OnInitialized()
+	{
+		Redirect(false);
+	}
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		Redirect(false);
+	}
+
+	void Redirect()
+	{
+		Redirect(true);
+	}
+
+	void Redirect(bool reloadIfNull)
+	{
+		if (CurrentUser.Value is not null)
+			Navigation.NavigateTo(RedirectTo ?? "/");
+		else if (reloadIfNull)
+			Navigation.Reload();
+	}
+
+	void Submit(EditContext context)
+	{
+		ErrorMessage = "";
+		// Register
+		if (LoginManager.TryCreateUser(LoginData.Username, LoginData.Password,
+			LoginData.FirstName, LoginData.MiddleName, LoginData.MiddleName,
+			LoginData.Email) is User user)
+		{
+			CurrentUser.Value = user;
+			Navigation.NavigateTo(RedirectTo??"/");
+		}else
+		{
+			ErrorMessage = "An user with this e-mail address or username does already exist in our database.";
+		}
+	}
+
+	void IDisposable.Dispose()
+	{
+		CurrentUser.ValueChanged -= Redirect;
+	}
+}

@@ -78,7 +78,7 @@ internal static partial class Program
 		return $"/{post.PublishedOn.Year}/{post.PublishedOn.Month}/{post.PublishedOn.Day}/{post.Id}/{post.Title.Browserize()}";
 	}
 	const string lettersString = "ABCDEFGHIJKLMNOPQRSTUVWXYZaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyzaaabcdeeeefghiijklmnooopqrstuuvwxyz";
-	
+
 	public static Paragraph Paragraph(this Random random, int minWordCount = 50, int maxWordCount = 200)
 	{
 		var paragraph = new Paragraph(null, string.Join(' ', random.Words(minWordCount, maxWordCount)) + ".");
@@ -98,9 +98,9 @@ internal static partial class Program
 		return paragraphs;
 	}
 
-	public static string Word(this Random random)
+	public static string Word(this Random random, int minLength = 2, int maxLength = 7)
 	{
-		char[] characters = new char[random.Next(2, 7)];
+		char[] characters = new char[minLength == maxLength ? minLength : random.Next(minLength, maxLength)];
 		for (int i = 0; i < characters.Length; i++)
 		{
 			characters[i] = lettersString[Random.Shared.Next(0, lettersString.Length)];
@@ -130,9 +130,9 @@ internal static partial class Program
 
 	public static TimeSpan CalculateReadingTime(this string text)
 	{
-		const decimal wordsPerSecond = 225/60;
+		const decimal wordsPerSecond = 225 / 60;
 		int words = text.Count(x => x == ' ') + 1;
-		int secondsToRead = decimal.ToInt32(words/wordsPerSecond);
+		int secondsToRead = decimal.ToInt32(words / wordsPerSecond);
 		return TimeSpan.FromSeconds(secondsToRead);
 	}
 
@@ -161,18 +161,18 @@ internal static partial class Program
 		navigation.NavigateTo(navigation.Uri, true);
 	}
 
-    public static NameValueCollection QueryString(this NavigationManager navigationManager)
-    {
-        return HttpUtility.ParseQueryString(new Uri(navigationManager.Uri).Query);
-    }
+	public static NameValueCollection QueryString(this NavigationManager navigationManager)
+	{
+		return HttpUtility.ParseQueryString(new Uri(navigationManager.Uri).Query);
+	}
 
-    public static string QueryString(this NavigationManager navigationManager, string key)
-    {
-        return navigationManager.QueryString()[key]??"";
-    }
+	public static string QueryString(this NavigationManager navigationManager, string key)
+	{
+		return navigationManager.QueryString()[key] ?? "";
+	}
 
-    public static T? QueryString<T>(this NavigationManager navigationManager, string key, T? defaultValue = default)
-    {
+	public static T? QueryString<T>(this NavigationManager navigationManager, string key, T? defaultValue = default)
+	{
 		var value = navigationManager.QueryString(key);
 		if (value is not null)
 		{
@@ -186,5 +186,5 @@ internal static partial class Program
 			}
 		}
 		return defaultValue;
-    }
+	}
 }

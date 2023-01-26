@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 @using System.Text;
-@page "/Login/{RedirectTo?}"
+@page "/Login/{*RedirectTo}"
+@implements IDisposable
 @inject LoginManager LoginManager
 @inject NavigationManager Navigation
 @inject ProtectedLocalStorage LocalStorage
@@ -9,12 +10,13 @@
 
 <h1>Login</h1>
 <EditForm Model="LoginData" OnValidSubmit="Submit">
-	<InputText DisplayName="Username" @bind-Value="@LoginData.Username"/>
-	<InputText DisplayName="Password" @bind-Value="@LoginData.Password" type='password'/>
-	<InputCheckbox DisplayName="Remember Me" @bind-Value="@LoginData.RememberMe"/>
-	<button type="submit">Login</button>
 	<DataAnnotationsValidator />
-	<ValidationSummary/>
+	<BetterInputText DisplayName="Username" AutoCompleteName="Username" @bind-Value="@LoginData.Username"/>
+	<BetterInputText DisplayName="Password" AutoCompleteName="Password" @bind-Value="@LoginData.Password" type='password' />
+	<BetterInputCheckbox DisplayName="Remember Me" @bind-Value="@LoginData.RememberMe"/>
+	<p>New here? <a href="/Register">Register instead!</a></p>
+	<button type="submit">Login</button>
+	@ErrorMessage
 </EditForm>
 
 @code {
@@ -26,6 +28,35 @@
 
 	public string ErrorMessage { get; set; } = "";
 
+	protected override void OnParametersSet()
+	{
+		CurrentUser.ValueChanged += Redirect;
+		Redirect(false);
+	}
+
+	protected override void OnInitialized()
+	{
+		Redirect(false);
+	}
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		Redirect(false);
+	}
+
+	void Redirect()
+	{
+		Redirect(true);
+	}
+
+	void Redirect(bool reloadIfNull)
+	{
+		if (CurrentUser.Value is not null)
+			Navigation.NavigateTo(RedirectTo ?? "/");
+		else if (reloadIfNull)
+			Navigation.Reload();
+	}
+
 	async Task Submit(EditContext context)
 	{
 		ErrorMessage = "";
@@ -35,7 +66,8 @@
 			if (value is null)
 			{
 				ErrorMessage = "Incorrect password.";
-			}else
+			}
+			else
 			{
 				CurrentUser.Value = value;
 
@@ -45,11 +77,17 @@
 					await LocalStorage.SetAsync("userinfo", valueToStore);
 
 				await SessionStorage.SetAsync("userinfo", valueToStore);
-				Navigation.NavigateTo(RedirectTo ?? "/");
+				Redirect();
 			}
-		}else
+		}
+		else
 		{
 			ErrorMessage = "Incorrect username.";
 		}
+	}
+
+	void IDisposable.Dispose()
+	{
+		CurrentUser.ValueChanged -= Redirect;
 	}
 }

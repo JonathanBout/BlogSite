@@ -11,12 +11,13 @@
 			@{
 				bool hasCreationDate = Visibility.HasFlag(PreviewComponentVisibility.CreationDate);
 				bool hasTimeToRead = Visibility.HasFlag(PreviewComponentVisibility.TimeToRead);
+				bool hasAuthor = Visibility.HasFlag(PreviewComponentVisibility.Author);
 			}
 			@if (hasCreationDate)
 			{
 				@Post.PublishedOn.ToString("dd MMMM yyyy, HH:mm")
 			}
-			@if (hasCreationDate && hasTimeToRead)
+			@if (hasCreationDate && (hasTimeToRead || hasAuthor))
 			{
 				<span> | </span>
 			}
@@ -25,10 +26,20 @@
 				<span>
 					Reading Time: about
  				</span>
-				@Post.CalculateReadingTime().Minutes
+				 <span>
+					@Post.CalculateReadingTime().Minutes
+				 </span>
 				<span>
 					Minutes
 				</span>
+			}
+			@if (hasTimeToRead && hasAuthor)
+			{
+				<span> | </span>
+			}
+			@if (hasAuthor)
+			{
+				<a href="Users/@Post.Author.Id">@Post.Author.ToString()</a>
 			}
 		</div>
 		@if (Visibility.HasFlag(PreviewComponentVisibility.ContentPreview))

@@ -11,12 +11,25 @@
 	{
 		<a href="/Latest">Latest</a>
 		<a href="/Archive/@(DateTime.Now.Year - 1)">Archive</a>
+		<Authenticate>
+			<Authenticated>
+				<a href="/Account/Posts">My Posts</a>
+			</Authenticated>
+			<Authenticating>
+				<a href="/Account/Posts">My Posts</a>
+			</Authenticating>
+			<NotAuthenticated>
+			</NotAuthenticated>
+		</Authenticate>
 		<div class="spacer"></div>
 		<div class="button">
 			<Authenticate>
 				<Authenticated>
 					<a class="nolink" href="/Account">Account</a>
 				</Authenticated>
+				<Authenticating>
+					<a class="nolink" href="/Account">Account</a>
+				</Authenticating>
 				<NotAuthenticated>
 					<a class='nolink' href='/Login'>Login</a>
 				</NotAuthenticated>

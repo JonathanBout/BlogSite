@@ -1,0 +1,16 @@
+﻿@inherits Microsoft.AspNetCore.Components.Forms.InputCheckbox
+@{
+	string id = Random.Shared.Word(15, 15);
+}
+<div style="margin-bottom: 5px;">
+	<label>
+		<span style="display: inline;">
+			@DisplayName
+		</span>
+		<input style="display: inline;" id="@id" @attributes="AdditionalAttributes"
+			   name="@DisplayName?.Browserize()"
+			   type="checkbox"
+			   class="@CssClass"
+			   value="@CurrentValue" />
+	</label>
+</div>

@@ -1,5 +1,8 @@
 ﻿@page "/Account"
-<Authenticate @ref="Authenticator">
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+<Authenticate @ref="Authenticator" RedirectIfNotAuthenticated="true">
 	<Authenticated>
 		<h1>Your Account</h1>
 		@if (Authenticator is not null)
@@ -11,14 +14,19 @@
 				Full Name: @CurrentUser.Value!.ToString()
 			</p>
 		}
+		<a @onclick="Logout">Log Out</a>
 	</Authenticated>
-	<NotAuthenticated>
-		<Redirect Url="/Login" AppendCurrentUrl="true"/>
-	</NotAuthenticated>
 </Authenticate>
 
 @code{
 	Authenticate? Authenticator { get; set; } = null;
 	[CascadingParameter]
 	public CascadingObject<User> CurrentUser { get; set; } = null!;
+
+	async Task Logout()
+	{
+		await JS.InvokeVoidAsync("localStorage.clear");
+		await JS.InvokeVoidAsync("sessionStorage.clear");
+		Navigation.NavigateTo("/", true);
+	}
 }
